@@ -1,0 +1,20 @@
+services:
+  SimpleElastix:
+    build:
+      context: ../
+      dockerfile: docker_src/Dockerfile
+      ssh:
+        - default
+    image: simple-elastix:latest
+    container_name: SimpleElastix
+    user: "0:0" #"${UID}:${GID}"
+    working_dir: /app
+    stdin_open: true # docker run -i
+    tty: true # docker run -t
+    environment:
+      - HOST_HOME=${HOST_HOME}
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      # - ../:/app/Software/SimpleElastix-brachyutils
+      - ${HOST_HOME}:/home/ubuntu/YourLocalHome
