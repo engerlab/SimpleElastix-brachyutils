@@ -1,0 +1,3 @@
+[submodule "SimpleITK"]
+	path = SimpleITK
+	url = https://github.com/SimpleITK/SimpleITK.git
