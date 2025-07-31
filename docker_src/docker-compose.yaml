@@ -7,7 +7,7 @@ services:
         - default
     image: simple-elastix:latest
     container_name: SimpleElastix
-    user: "0:0" #"${UID}:${GID}"
+    user: "${UID}:${GID}"
     working_dir: /app
     stdin_open: true # docker run -i
     tty: true # docker run -t

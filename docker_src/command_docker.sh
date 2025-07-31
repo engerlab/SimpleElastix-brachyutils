@@ -1,5 +1,7 @@
 #!/bin/bash
 # set the environment variables for the container
+export UID=$(id -u)
+export GID=$(id -g)
 export DISPLAY=${DISPLAY}
 xhost +local: # to allow the container to access the host display
 export XAUTHORITY=${HOME}/.Xauthority
