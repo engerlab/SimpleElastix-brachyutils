@@ -9,5 +9,11 @@ RUN apt update && apt install -y zip unzip wget curl net-tools x11-apps\
     mkdir -p /root/.ssh &&\
     ssh-keyscan github.com >> /root/.ssh/known_hosts
 
+COPY docker_src/repositories/install_cmake.sh ${dir_software}/install_cmake.sh
+RUN --mount=type=ssh bash ${dir_software}/install_cmake.sh
+
+COPY docker_src/repositories/install_python.sh ${dir_software}/install_python.sh
+RUN --mount=type=ssh bash ${dir_software}/install_python.sh
+
 COPY install_simpleElastix.sh ${dir_software}/install_simpleElastix.sh
 RUN --mount=type=ssh bash ${dir_software}/install_simpleElastix.sh

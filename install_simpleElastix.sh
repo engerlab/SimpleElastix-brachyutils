@@ -7,7 +7,7 @@
 dir_software=/app/Software
 num_threads=16
 
-apt install -y build-essential cmake python3-dev python3-pip
+# apt install -y build-essential
 
 cd ${dir_software}
 git clone --recurse-submodules https://github.com/engerlab/SimpleElastix-brachyutils.git
