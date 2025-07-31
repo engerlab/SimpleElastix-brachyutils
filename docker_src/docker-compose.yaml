@@ -17,4 +17,4 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       # - ../:/app/Software/SimpleElastix-brachyutils
-      - ${HOST_HOME}:/home/ubuntu/YourLocalHome
+      # - ${HOST_HOME}:/home/ubuntu/YourLocalHome

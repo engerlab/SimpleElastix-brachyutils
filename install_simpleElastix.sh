@@ -16,10 +16,9 @@ cd ${dir_software}/SimpleElastix-brachyutils/SimpleITK || exit
 mkdir build
 cd build || exit
 
-cmake ../SuperBuild #\
-    # -DSIMPLEITK_USE_ELASTIX=ON \
+cmake ../SuperBuild -DSimpleITK_USE_ELASTIX=ON
     # -DSIMPLEITK_USE_PYTHON=ON \
     # -DSIMPLEITK_USE_PYTHON_WRAPPING=ON
 
-# make -j ${num_threads}
-# python3 -m pip install build/Wrapping/Python
+make -j ${num_threads}
+python3.13 -m pip install SimpleITK-build/Wrapping/Python
