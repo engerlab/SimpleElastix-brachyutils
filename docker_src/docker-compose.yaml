@@ -17,4 +17,5 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ../elastix-api.py:/app/Software/SimpleElastix-brachyutils/elastix-api.py
-      # - ${HOST_HOME}:/home/ubuntu/YourLocalHome
+      - ${HOST_HOME}:/home/ubuntu/YourLocalHome
+      - ../temp_data:/app/Software/SimpleElastix-brachyutils/temp_data
