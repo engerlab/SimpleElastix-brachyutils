@@ -1,5 +1,5 @@
 FROM ubuntu:24.04
-
+# FROM simple-elastix:latest
 ARG dir_software="/app/Software"
 WORKDIR ${dir_software}
 USER root
@@ -17,3 +17,6 @@ RUN --mount=type=ssh bash ${dir_software}/install_python.sh
 
 COPY install_simpleElastix.sh ${dir_software}/install_simpleElastix.sh
 RUN --mount=type=ssh bash ${dir_software}/install_simpleElastix.sh
+
+COPY py_requirements.txt ${dir_software}/py_requirements.txt
+RUN python3.13 -m pip install -r ${dir_software}/py_requirements.txt
