@@ -20,3 +20,7 @@ RUN --mount=type=ssh bash ${dir_software}/install_simpleElastix.sh
 
 COPY py_requirements.txt ${dir_software}/py_requirements.txt
 RUN python3.13 -m pip install -r ${dir_software}/py_requirements.txt
+
+# for development. delete later
+# COPY run_api.sh ${dir_software}/SimpleElastix-brachyutils/run_api.sh
+# COPY elastix-api.py ${dir_software}/SimpleElastix-brachyutils/elastix-api.py
