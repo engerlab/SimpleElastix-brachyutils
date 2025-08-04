@@ -4,6 +4,7 @@ from SimpleITK import (
     )
 from pydantic import BaseModel
 from fastapi import FastAPI
+from pathlib import Path
 
 class Elastix_Inputs(BaseModel):
     r"""
@@ -17,7 +18,14 @@ class Elastix_Inputs(BaseModel):
     pth_fixed_image: str
     pth_moving_image: str
     parameter_map: str = "translation"
-    pth_output_image: str = "temp_data/registered_image.nrrd"
+    pth_output_image: str = "registered_image.nrrd"
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        dir_temp_data = Path(__file__).parent.joinpath("temp_data")
+        self.pth_fixed_image=  str(dir_temp_data.joinpath(self.pth_fixed_image))
+        self.pth_moving_image= str(dir_temp_data.joinpath(self.pth_moving_image))
+        self.pth_output_image= str(dir_temp_data.joinpath(self.pth_output_image))
 
 app = FastAPI()
 
@@ -57,8 +65,8 @@ def elastix_register(elastix_inputs: Elastix_Inputs):
 
 def test_elastix_register():
     input_obj = Elastix_Inputs(
-        pth_fixed_image="temp_data/mr_case000000.nrrd",
-        pth_moving_image="temp_data/us_case000000.nrrd"
+        pth_fixed_image="mr_case000000.nrrd",
+        pth_moving_image="us_case000000.nrrd"
     )
     elastix_register(input_obj)
 

@@ -20,3 +20,5 @@ services:
       # - ../run_api.sh:/app/Software/SimpleElastix-brachyutils/run_api.sh
       - ${HOST_HOME}:/home/ubuntu/YourLocalHome
       - ../temp_data:/app/Software/SimpleElastix-brachyutils/temp_data
+    entrypoint: ["/bin/bash"]
+    command: ["/app/Software/SimpleElastix-brachyutils/run_api.sh"]
