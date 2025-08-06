@@ -1,12 +1,13 @@
 from SimpleITK import (
     ReadImage, WriteImage, ElastixImageFilter,
     GetDefaultParameterMap, WriteParameterFile,
-    ReadParameterFile, TransformixImageFilter
+    ReadParameterFile, TransformixImageFilter,
+    ParameterMap
     )
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from fastapi import FastAPI
 from pathlib import Path
-from typing import List
+from typing import List, Literal
 
 class Register_Inputs(BaseModel):
     r"""
@@ -17,9 +18,11 @@ class Register_Inputs(BaseModel):
     - `moving_image`: Path to the moving image.
     - `parameter_map`: parameter map for the transformations.
     """
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     pth_fixed_image: str
     pth_moving_image: str
-    parameter_map: str = "translation"
+    parameter_maps: List[dict | str | ParameterMap] = None
     pth_output_image: str = "registered_image.nrrd"
 
     def __init__(self, **data):
@@ -44,12 +47,14 @@ def elastix_register(elastix_inputs: Register_Inputs):
 
     fixed_image = ReadImage(elastix_inputs.pth_fixed_image)
     moving_image = ReadImage(elastix_inputs.pth_moving_image)
-    parameter_map = GetDefaultParameterMap(elastix_inputs.parameter_map)
 
     ela_img_filter = ElastixImageFilter()
     ela_img_filter.SetFixedImage(fixed_image)
     ela_img_filter.SetMovingImage(moving_image)
-    ela_img_filter.SetParameterMap(parameter_map)
+
+    if elastix_inputs.parameter_maps is not None:
+        parameter_map = GetDefaultParameterMap(elastix_inputs.parameter_map)
+        ela_img_filter.SetParameterMap(parameter_map)
 
     result = ela_img_filter.Execute()
     try:
@@ -151,6 +156,6 @@ def test_elastix_warp():
 if __name__ == "__main__":
     test_elastix_register()
     # print("Elastix registration test completed successfully.")
-    test_elastix_warp()
-    print("Elastix warping test completed successfully.")
+    # test_elastix_warp()
+    # print("Elastix warping test completed successfully.")
     
