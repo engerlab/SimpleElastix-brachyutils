@@ -16,11 +16,13 @@ class Register_Inputs(BaseModel):
     ### Attributes:
     - `fixed_image`: str := Path to the fixed image.
     - `moving_image`: str := Path to the moving image.
-    - `parameter_map`: list[dict | str] := parameter map for the transformations.
-        For strings, we get the default maps from sitk. If a dictionary was provided where the key
-        "default_parameter_map" matched a name of a default map, we would load the default map,
-        then override the provided keys and values. if the dictionary with non-matching key,
-        we create a parameter map from scratch.
+    - `parameter_map`: list[dict | str] := list of parameter maps for the transformations.
+        For strings, we get the default maps from sitk, which are any combination of:
+        "translation", "affine", "bspline", "groupwise", "rigid".
+        If a dictionary is provided, it can contain the key "default_parameter_map" to specify
+        which default map to use. If "default_parameter_map" matched a name of a default map,
+        we would load the default map, then override the remaining provided keys and values.
+        If the dictionary does not specify "default_parameter_map", we create a parameter map from scratch.
     """
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
