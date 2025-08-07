@@ -2,28 +2,35 @@ from SimpleITK import (
     ReadImage, WriteImage, ElastixImageFilter,
     GetDefaultParameterMap, WriteParameterFile,
     ReadParameterFile, TransformixImageFilter,
-    ParameterMap
+    ParameterMap, sitkNearestNeighbor
     )
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from fastapi import FastAPI
 from pathlib import Path
-from typing import List, Literal
+from typing import List, ClassVar
 
 class Register_Inputs(BaseModel):
     r"""
     ### Purpose:
     - This class defines the inputs required for the Elastix registration API.
     ### Attributes:
-    - `fixed_image`: Path to the fixed image.
-    - `moving_image`: Path to the moving image.
-    - `parameter_map`: parameter map for the transformations.
+    - `fixed_image`: str := Path to the fixed image.
+    - `moving_image`: str := Path to the moving image.
+    - `parameter_map`: list[dict | str] := parameter map for the transformations.
+        For strings, we get the default maps from sitk. If a dictionary was provided where the key
+        "default_parameter_map" matched a name of a default map, we would load the default map,
+        then override the provided keys and values. if the dictionary with non-matching key,
+        we create a parameter map from scratch.
     """
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     pth_fixed_image: str
     pth_moving_image: str
-    parameter_maps: List[dict | str | ParameterMap] = None
+    parameter_maps: List[dict | str] = None
     pth_output_image: str = "registered_image.nrrd"
+
+    _parameter_maps_sitk: List[ParameterMap] = []
+    _valid_param_maps: ClassVar[List[str]] = ["translation", "affine", "bspline", "groupwise", "rigid"]
 
     def __init__(self, **data):
         super().__init__(**data)
@@ -31,6 +38,28 @@ class Register_Inputs(BaseModel):
         self.pth_fixed_image=  str(dir_temp_data.joinpath(self.pth_fixed_image))
         self.pth_moving_image= str(dir_temp_data.joinpath(self.pth_moving_image))
         self.pth_output_image= str(dir_temp_data.joinpath(self.pth_output_image))
+
+        # process the parameter maps argument. For strings, we get the default maps.
+        # if a dictionary where key matched a name of a default map, we would load the 
+        # default map, then override the provided keys and values.
+        # if the dictionary with non-matching key, we create a parameter map from scratch.
+        if self.parameter_maps is not None:
+            for param_map in self.parameter_maps:
+                if isinstance(param_map, str):
+                    if param_map not in self._valid_param_maps:
+                        raise ValueError(f"Parameter map {param_map} is not recognized. \
+                            valid options are: \n {self._valid_param_maps}")
+                    self._parameter_maps_sitk.append(GetDefaultParameterMap(param_map))
+                if isinstance(param_map, dict):
+                    # see if they want to modify a default_parameter_map
+                    default_param_map = param_map.pop("default_parameter_map", None)
+                    if default_param_map in self._valid_param_maps:
+                        param_sitk = GetDefaultParameterMap(default_param_map)
+                    else:
+                        param_sitk = ParameterMap()
+                    for param, val in param_map.items():
+                        param_sitk[param] = [val]
+                    self._parameter_maps_sitk.append(param_sitk)
 
 app = FastAPI()
 
@@ -52,9 +81,12 @@ def elastix_register(elastix_inputs: Register_Inputs):
     ela_img_filter.SetFixedImage(fixed_image)
     ela_img_filter.SetMovingImage(moving_image)
 
-    if elastix_inputs.parameter_maps is not None:
-        parameter_map = GetDefaultParameterMap(elastix_inputs.parameter_map)
-        ela_img_filter.SetParameterMap(parameter_map)
+    if elastix_inputs._parameter_maps_sitk:
+        for i, param_map in enumerate(elastix_inputs._parameter_maps_sitk):
+            if i == 0:
+                ela_img_filter.SetParameterMap(param_map)
+            else:
+                ela_img_filter.AddParameterMap(param_map)
 
     result = ela_img_filter.Execute()
     try:
@@ -66,7 +98,6 @@ def elastix_register(elastix_inputs: Register_Inputs):
                 str(
                     Path(elastix_inputs.pth_output_image).parent.joinpath(f"transform_parameter_{i}.txt"))
             )
-
         return {
             "status": "success",
             "message": "Image registration completed successfully.",
@@ -139,9 +170,18 @@ def elastix_warp(warp_inputs: Warp_Inputs):
         }
 
 def test_elastix_register():
+    dict_param_map = [
+        {
+            "default_parameter_map": "translation",
+            "Interpolator": "NearestNeighborInterpolator"
+            }
+        
+        ]
     input_obj = Register_Inputs(
-        pth_fixed_image="mr_case000000.nrrd",
-        pth_moving_image="us_case000000.nrrd"
+        pth_fixed_image="static.nrrd",
+        pth_moving_image="moving.nrrd",
+        # parameter_maps=["translation", "affine"]
+        parameter_maps=dict_param_map
     )
     elastix_register(input_obj)
 
