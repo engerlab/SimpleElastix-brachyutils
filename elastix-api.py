@@ -173,9 +173,9 @@ def test_elastix_register():
     dict_param_map = [
         {
             "default_parameter_map": "translation",
-            "Interpolator": "NearestNeighborInterpolator"
+            "Interpolator": "NearestNeighborInterpolator",
+            # "ResampleInterpolator": "NearestNeighborInterpolator"
             }
-        
         ]
     input_obj = Register_Inputs(
         pth_fixed_image="static.nrrd",

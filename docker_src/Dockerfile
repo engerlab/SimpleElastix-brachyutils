@@ -22,5 +22,5 @@ USER root
 # RUN python3.13 -m pip install -r ${dir_software}/py_requirements.txt
 
 # for development. delete later
-COPY run_api.sh ${dir_software}/SimpleElastix-brachyutils/run_api.sh
+# COPY run_api.sh ${dir_software}/SimpleElastix-brachyutils/run_api.sh
 COPY elastix-api.py ${dir_software}/SimpleElastix-brachyutils/elastix-api.py
